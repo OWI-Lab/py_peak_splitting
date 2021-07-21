@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import setuptools
-from py_peak_splitting.__version__ import __version__
+import py_peak_splitting
 
 # load the README file and use it as the long_description for PyPI
 def readme():
@@ -11,14 +11,14 @@ def readme():
 # https://setuptools.readthedocs.io/en/latest/setuptools.html#id9
 setuptools.setup(
     name='py_peak_splitting',
-    version=__version__,    
+    version=py_peak_splitting.__version__,    
     description='Utilities to de-noise time series from random telegraph noise / peak splitting artefacts',
-    long_description = readme()
-    url='',
+    long_description = readme(),
+    url='https://github.com/OWI-Lab/py_peak_splitting',
     author='D.J.M. Fallais',
     author_email='dominik.fallais@vub.be',
     license='Creative Commons BY-SA 4.0',
-    keywords = ['engineering', 'peak-splitting', 'RTN', 'hampel', 'threshold']
+    keywords = ['engineering', 'peak-splitting', 'RTN', 'hampel', 'threshold'],
     packages=setuptools.find_packages(),
     install_requires=['numpy',
 	              'matplotlib',
