@@ -125,8 +125,9 @@ class ThFilter(object):
 
 
     def estimate_oocs(self, arr=None, th=500, bin_density=10, margin=1, centric=True, aggressive=False):
-        """Method to estimate the out of cluster score, based on the default threshold estimates. Use in combination 
-         with _sig_ptp and a histogram plot to assess severity of peak splitting.
+        """
+        Method to estimate the out of cluster score, based on the default threshold estimates. Use in combination 
+        with _sig_ptp and a histogram plot to assess severity of peak splitting.
 
         :param arr: (Optional) noisy input array containing peak splitting / RTN artefacts; defaults to self.arr. 
         :type arr: npumpy.ndarra, with shape (n_signals, n_smaples)

@@ -1,19 +1,14 @@
-.. cookiecutter documentation master file, created by
-   sphinx-quickstart on Tue Sep  4 14:38:09 2018.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 Contents
 ========
-.. TODO provide some general information here
+The `py_peak_splitting`  package contains an implementation for the random telegraph noise (RTN) removal tools as outlined in: 
+**Multilevel RTN removal tools for dynamic FBG strain measurements corrupted by peak splitting artefacts**.
+	
+.. toctree::
+   documentation
+   
 
-`py_peak_splitting`  is a
-
-py_peak_splitting.th_filter
-+++++++++++++++++++++++++++
-
-.. automodule:: py_peak_splitting.th_filter
-   :members:
+.. toctree::
+   examples
 
 Indices and tables
 ==================
