@@ -1,7 +1,4 @@
-"""
-TH Filter
----------------------------------
-This is an implementation of a decision filter based random telegraph noise removal tool; In which a threshold based 
+"""This module contains an implementation of a decision filter based random telegraph noise removal tool; In which a threshold based 
 decision filter is used for the purpose of segment wise outlier detection in the sample-wise difference signal corresponding 
 to the corrupted raw signal. The threshold used for outlier detection is derived from the histogram of the difference signal.
 Subsequently each detected outlier is replaced using a regression method applied on the sliding window method. Once the detection 
@@ -13,25 +10,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.neighbors import KernelDensity
 
-
 class ThFilter(object):
-    """
-    Perform a signal reconstruction using a: decision filter for detecting outliers in the sample wise difference signal (computed
-    from the noisy input data) in combination with a regression method for replacing detected outliers by estimates; the cumulative
-    sum of the de-noised difference signal is computed to arrive at a de-noised realisation of the corrupted input array.
+    """The ThFilter class implements a threshold filter for detecting outliers in the sample wise difference signal in 
+    combination with a regression method for replacing detected outliers by estimates; The sample wise difference signal 
+    is computed from the noisy input data; the cumulative sum of the de-noised difference signal is computed to arrive 
+    at a de-noised realisation of the corrupted input array.
 
-    :param arr: raw data containing jumps. 
-    :type arr: numpy.ndarray, with shape (n_signals, n_smaples)
-   
-    examples:
-    ---------------------------------
-
+    :param arr: A number of Raw signals containing jumps stored in an array of shape (n_signals x n_samples). 
+    :type arr: Numpy.ndarray.
     """
 
     def __init__(self, arr):
-        """
-        :param arr: noisy input array containing peak splitting / RTN artefacts. 
-        :type arr: npumpy.ndarra, with shape (n_signals, n_smaples)
+        """Constructor method
         """
         # instantiate object attributes and ensure that array is two dimensionsal
         self.arr = np.atleast_2d(arr)
@@ -40,11 +30,13 @@ class ThFilter(object):
         self.counts = []
 
     def sig_ptp(self, order=0):
-        """ 
-        Peak to peak amplitude of a signal, or a differenced version of that signal.
-        :param arr: input array of dimensions (Num. signals , Num. samples)
+        """Peak to peak amplitude of provided raw signals, or a differenced version of those signal; The order of the sample
+        wise differencing is set using the order parameter.
+
         :param order: order of sample wise differencing operation
-        :return: list of ptp values of (difference) array(s)
+        :type order: int
+        :return: list of peak to peak values from self.arr
+        :rtype: list
         """
         rng_lst = list()
         for arr in np.atleast_2d(self.arr):
@@ -53,46 +45,34 @@ class ThFilter(object):
             rng_lst.append(np.ptp(arr))
         return rng_lst
     
-
-    
-
-
-    :param re: replacement method: 're', 'med', 'plf'
-    :type re: str
-
-    :param nperseg: number of samples per segment
-    :type nperseg: int
-
-    :param settings: optional dictionary containing settings for np.polyfit.
-    :type settings: dict
-
     def estimate_th(self, arr=None, th=500, bin_density=10, margin=1, centric=True, aggressive=False, plot=False, kde=False, yscale='log', lhb=0.2):
-        """ 
-        Estimate threshold setting for the difference arr. The threshold to be estimated will be
-        used to detect outliers in difference arr. The threshold estimates are derived using the
-        histogram counts of the difference signal.
+        """Method to estimate the threshold setting for the outlier detection. The threshold estimates are derived from 
+        the histogram of the difference signal(s) as: the average of the absoute bin centers (positive and negative) for
+        which the histogram count first drops below the value specified with 'th';when aggressive is set to True the 
+        value of 'th' will effectively be reduced to 0.
 
         :param arr: (Optional) noisy input array containing peak splitting / RTN artefacts; defaults to self.arr. 
-        :type arr: npumpy.ndarra, with shape (n_signals, n_smaples)
-        :param th: threshold value for determining historgram bin counts which are used to estimate the domain
+        :type arr: numpy.ndarray, with shape (n_signals, n_smaples)
+        :param th: Threshold value for determining historgram bin counts which are used to estimate the domain
         :type th: float
-        :param bin_density: number of bins per unit - histograms will be created with identical bin density
+        :param bin_density: Number of bins per unit - histograms will be created with identical bin density
         :type bin_density: int
-        :param margin: scale factor which can be applies on the final th estimates
+        :param margin: Scale factor which can be applies on the final th estimates
         :type margin: float 
-        :param centric: True: start from center of histogram and take th values as the bin centers at which the histogram count first drops below the th on bin counts.
+        :param centric: True: Scan bin centers on matching threshold conditions for negative and positive axis separately
         :type centric: Bool
-        :param aggressive: in addition to the above, try a more aggressive approach and replace th values if the aggressive th estimates are not larger than 1.25 of the default estimates.
+        :param aggressive: Replace threshold values by zero; Only recommended if the jumps are significanlty larger than the nominal difference samples.
         :type aggressive: Bool
-        :param plot: show the histogram for each signal and plot th values
+        :param plot: Option to plot the histogram with corresponding threshold values for each signal
         :type plot: Bool
-        :param kde: also plot kde estimate over histogram - default bandwidth is set to 0.1.
+        :param kde: Option to overlay histogram with kernel density estimate - default bandwidth is set to 0.1.
         :type kde: Bool
-        :param yscale: plot everything on log scale
+        :param yscale: Parameter controlling the default scaling of the y-axis. 
         :type yscale: str
-        :param lhb: optional parameter when aggressive=True: provides lower search bound on histrogram. 
+        :param lhb: Optional parameter when aggressive=True: provides lower search bound on histrogram bin centers. 
         :type lhb: float
-        :return:
+        :return: list of derived threshold levels 
+        :rtype: list
         """
         if arr is None:
             arr = self.arr
@@ -145,10 +125,9 @@ class ThFilter(object):
 
 
     def estimate_oocs(self, arr=None, th=500, bin_density=10, margin=1, centric=True, aggressive=False):
-        """ 
-        Estimate out of cluster score based on th recommendation. This measure is not suitable for arr which
-        are free of peak splitting - in that case setting margin to 1.25 could result in some more aggressive th settings.
-        Use in combination with _sig_ptp / a histogram plot to assess which data contains outliers.
+        """Method to estimate the out of cluster score, based on the default threshold estimates. Use in combination 
+         with _sig_ptp and a histogram plot to assess severity of peak splitting.
+
         :param arr: (Optional) noisy input array containing peak splitting / RTN artefacts; defaults to self.arr. 
         :type arr: npumpy.ndarra, with shape (n_signals, n_smaples)
         :param th: threshold value for determining historgram bin counts which are used to estimate the domain
@@ -161,7 +140,8 @@ class ThFilter(object):
         :type centric: Bool
         :param aggressive: in addition to the above, try a more aggressive approach and replace th values if the aggressive th estimates are not larger than 1.25 of the default estimates.
         :type aggressive: Bool
-        :return:
+        :return: list of scores
+        :rtype: list
         """
         if arr is None:
             arr = self.arr
@@ -180,15 +160,22 @@ class ThFilter(object):
         return scores
 
     def _recon_th(self, arr, time, th=0.5, nbuffer=25, method='median', settings=None):
-        """ 
-        Outlier detection based on thresholding of difference signal. Reconstruction using: polyfit or buffer stats.
-        :param arr: input array
-        :param time: time array
+        """ Method to perform the reconstruction for an individual signal/array.
+
+        :param arr: noisy input array containing peak splitting / RTN artefacts.
+        :type arr: npumpy.ndarra, with shape (1, n_smaples)
+        :param time: time array or pseudo time array containgin sample indices
+        :type time: numpy.ndarray
         :param th: threshold level for outlier detection
-        :param nbuffer: maximum number of samples in data buffer which is used to create outlier replacements
-        :param method: 'polyfit', 'mean', 'median', 'random'
+        :type th: float
+        :param nbuffer: Number of samples in data buffer which is used to create outlier replacements
+        :type nbuffer: int
+        :param method: string to select outlier replacement method 'polyfit', 'mean', 'median', 'random'
+        :type method: str
         :param settings: settings dictionary for np.polyfit command.
-        :return: reconstructed array
+        :type settings: dict
+        :return: array holding the reconstructed signal, list containing the labels, list containing clusters
+        :rtype: numpy.ndarray
         """
         
         # define default settings for polyfit - ensure full is False. all others are good.
@@ -265,15 +252,23 @@ class ThFilter(object):
         return np.cumsum(recon_dd), labels, clusters
 
     def recon_th(self, arr=None, time=None, th=None, method='median', nbuffer=25, settings=None, ):
-        """ 
-        Do a reconstruction on a Signal/SignalList, using th based  discrimination of difference samples.
-        uses _recon_th on array level.
-        :param arr:
-        :param th: None, float, list - th value is used to discriminate absolute difference samples as in- or outliers.
-        :param method: 'polyfit', 'mean', 'median', 'random'
-        :param nbuffer: maximum number of samples in data buffer which is used to create outlier replacements
-        :param settings: settings dictionary for polyfit method
-        :return:
+        """ Method do perform a reconstruction on signals contained in a numpy.ndarray of shape (n_signals, n_samples).      
+        uses 'self._recon_th' to perform a reconstruction on the individual arrays/signals.
+        
+        :param arr: (Optional) noisy input array containing peak splitting / RTN artefacts. Defaults to 'self.arr'.
+        :type arr: npumpy.ndarra, with shape (1, n_smaples)
+        :param time: (Optional) time array or pseudo time array containgin sample indices
+        :type time: numpy.ndarray
+        :param th: (Optional) threshold level for outlier detection. Defaults to thresholds derived with 'self.estimate_th'
+        :type th: float
+        :param nbuffer: Number of samples in data buffer which is used to create outlier replacements
+        :type nbuffer: int
+        :param method: string to select outlier replacement method 'polyfit', 'mean', 'median', 'random'
+        :type method: str
+        :param settings: settings dictionary for np.polyfit command.
+        :type settings: dict
+        :return: array holding the reconstructed signal, a list containing the lists of labels, a list containing lists of clusters
+        :rtype: numpy.ndarray
         """
         
         if arr is None:
@@ -303,8 +298,10 @@ class ThFilter(object):
 
     # for consistency with other reconstruction methods:
     def _clusters(self):
-        """ construct list of samples corresponding to all inliers and outliers respectively.
-            :return:
+        """Construct list of samples corresponding to all inliers and outliers respectively.
+
+        :return: list holding lists of indiced corresponding to inlier and outliers respectively.
+        :rtype: list
         """
         clusters = list()
         for labels in self.labels:
@@ -313,15 +310,19 @@ class ThFilter(object):
         return clusters
 
     def _counts(self):
-        """ count inliers and outliers
-            :return:
+        """Count inliers and outliers
+
+        :return: list of lists holding the counts of inliers and outliers per signal.
+        :rtype: list
         """
         counts = [[len(cl) for cl in clusters] for clusters in self.clusters]
         return counts
 
     def _scores(self):
-        """ compute ratio between outliers and the total amount of samples.
-            :return:
+        """Compute ratio between outliers and the total amount of samples.
+
+        :return: list containging score for each signal
+        :rtype: list
         """
         scores = [counts[1] / (counts[0] + counts[1]) if len(counts) > 1 else -1 for counts in self.counts]
         return scores
