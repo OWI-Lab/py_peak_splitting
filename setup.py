@@ -6,26 +6,21 @@ import py_peak_splitting
 def readme():
     with open('README.md', 'r') as f:
         return f.read()
-try:
-    import pypandoc
-    long_description = pypandoc.convert('README.md', 'rst')
-except(IOError, ImportError):
-    long_description = open('README.md').read()
-     
+
 # package configuration - for reference see:
 # https://setuptools.readthedocs.io/en/latest/setuptools.html#id9
 setuptools.setup(
     name='py_peak_splitting',
     version=py_peak_splitting.__version__,    
     description='Utilities to de-noise time series from random telegraph noise / peak splitting artefacts',
-    long_description = long_description,
+    long_description=readme(),
     url='https://github.com/OWI-Lab/py_peak_splitting',
     author='D.J.M. Fallais',
     author_email='dominik.fallais@vub.be',
     license='Creative Commons BY-SA 4.0',
     keywords = ['engineering', 'peak-splitting', 'RTN', 'hampel', 'threshold'],
     packages=setuptools.find_packages(),
-    install_requires=['numpy','matplotlib','plotly', 'sklearn','pypandoc' ],
+    install_requires=['numpy', 'matplotlib','plotly','sklearn',],
     classifiers=[
         'Development Status :: 1 - Planning',
         'Intended Audience :: Research/Applied Sciences/Indsutry',
